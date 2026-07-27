@@ -55,7 +55,7 @@ public class NetherNetExtension implements Extension {
 
         // Start up NetherNet
         try {
-            this.signaling = new NetherNetHTTPSignaling(this.dataFolder().resolve(config.https().keystore()).toFile(), config.https().password(), this.dataFolder().resolve(config.identity().keystore()).toFile(), config.identity().password());
+            this.signaling = new NetherNetHTTPSignaling(config.https().enabled() ? this.dataFolder().resolve(config.https().keystore()).toFile() : null, config.https().password(), this.dataFolder().resolve(config.identity().keystore()).toFile(), config.identity().password());
 
             this.bossGroup = new NioEventLoopGroup(1);
             this.workerGroup = new NioEventLoopGroup();

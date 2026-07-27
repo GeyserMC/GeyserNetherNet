@@ -20,7 +20,7 @@ public interface Config {
         boolean enabled();
 
         @Comment("Path to the https keystore file")
-        @DefaultString("keystore-https.p12")
+        @DefaultString("https.p12")
         String keystore();
 
         @Comment("Password for the https keystore file")
@@ -31,7 +31,7 @@ public interface Config {
     @ConfigSerializable
     interface IdentityConfig {
         @Comment("Path to the identity keystore file")
-        @DefaultString("keystore-identity.p12")
+        @DefaultString("identity.p12")
         String keystore();
 
         @Comment("Password for the identity keystore file")
