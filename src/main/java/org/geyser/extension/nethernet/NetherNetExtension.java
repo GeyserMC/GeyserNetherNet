@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 
 public class NetherNetExtension implements Extension {
-
     private Config config;
 
     private EventLoopGroup bossGroup;

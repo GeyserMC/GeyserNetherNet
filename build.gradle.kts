@@ -51,11 +51,7 @@ dependencies {
     // The WebRTC library and its natives
     implementation("dev.kastle.webrtc:webrtc-java:$webrtcVersion")
     nativePlatforms.forEach { platform ->
-        runtimeOnly("dev.kastle.webrtc:webrtc-java:$webrtcVersion") {
-            artifact {
-                classifier = platform
-            }
-        }
+        runtimeOnly("dev.kastle.webrtc:webrtc-java:$webrtcVersion:$platform")
     }
 
     // Configurate
