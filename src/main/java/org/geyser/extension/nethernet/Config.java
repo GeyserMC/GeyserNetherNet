@@ -16,7 +16,7 @@ public interface Config {
     @ConfigSerializable
     interface HttpsConfig {
         @Comment("Whether HTTPS is enabled")
-        @DefaultBoolean(true)
+        @DefaultBoolean(false)
         boolean enabled();
 
         @Comment("Path to the https keystore file")

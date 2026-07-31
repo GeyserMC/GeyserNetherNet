@@ -99,7 +99,10 @@ tasks {
 
     shadowJar {
         dependencies {
-            exclude(dependency("io.netty:.*"))
+            // Exclude netty apart from the http codec
+            exclude {
+                it.moduleGroup == "io.netty" && (it.moduleName != "netty-codec-http" && it.moduleName != "netty-handler")
+            }
         }
 
         archiveClassifier.set("")

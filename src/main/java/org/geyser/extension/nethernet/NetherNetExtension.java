@@ -54,7 +54,7 @@ public class NetherNetExtension implements Extension {
 
         // Start up NetherNet
         try {
-            this.signaling = new NetherNetHTTPSignaling(config.https().enabled() ? this.dataFolder().resolve(config.https().keystore()).toFile() : null, config.https().password(), this.dataFolder().resolve(config.identity().keystore()).toFile(), config.identity().password());
+            this.signaling = new NetherNetHTTPSignaling(this.dataFolder().resolve(config.identity().keystore()).toFile(), config.identity().password(), config.https().enabled() ? this.dataFolder().resolve(config.https().keystore()).toFile() : null, config.https().password());
 
             this.bossGroup = new NioEventLoopGroup(1);
             this.workerGroup = new NioEventLoopGroup();
@@ -67,7 +67,7 @@ public class NetherNetExtension implements Extension {
             BedrockListener listener = this.geyserApi().bedrockListener();
             this.netherNetChannel = b.bind(new InetSocketAddress(listener.address(), listener.port())).sync().channel();
 
-            this.logger().info("NetherNet listener started on " + listener.address() + ":" + listener.port());
+            this.logger().info("NetherNet listener started on " + (config.https().enabled() ? "https" : "http") + "://" + listener.address() + ":" + listener.port());
         } catch (Exception e) {
             this.logger().error("Failed to start NetherNet", e);
             this.disable();
