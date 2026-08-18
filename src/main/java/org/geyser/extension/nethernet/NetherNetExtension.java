@@ -7,7 +7,11 @@ import dev.kastle.webrtc.PeerConnectionFactory;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.EventLoopGroup;
+import io.netty.channel.MultiThreadIoEventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.nio.NioIoHandler;
+import org.cloudburstmc.protocol.bedrock.BedrockPong;
+import org.geyser.extension.nethernet.nethernet.DummyPingChannel;
 import org.geyser.extension.nethernet.nethernet.NetherNetChannelInitialiser;
 import org.geysermc.event.subscribe.Subscribe;
 import org.geysermc.geyser.GeyserImpl;
@@ -21,10 +25,11 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 
 public class NetherNetExtension implements Extension {
+    private static final Channel PING_CHANNEL = new DummyPingChannel();
+
     private Config config;
 
-    private EventLoopGroup bossGroup;
-    private EventLoopGroup workerGroup;
+    private EventLoopGroup eventLoopGroup;
     private Channel netherNetChannel;
     private NetherNetServerSignaling signaling;
 
@@ -54,13 +59,32 @@ public class NetherNetExtension implements Extension {
 
         // Start up NetherNet
         try {
-            this.signaling = new NetherNetHTTPSignaling(this.dataFolder().resolve(config.identity().keystore()).toFile(), config.identity().password(), config.https().enabled() ? this.dataFolder().resolve(config.https().keystore()).toFile() : null, config.https().password());
+            // Build the base signaling instance
+            NetherNetHTTPSignaling.Builder signallingBuilder = new NetherNetHTTPSignaling.Builder()
+                .setIdentityKeystore(this.dataFolder().resolve(config.identity().keystore()).toFile(), config.identity().password())
+                .setMotdProvider((host, remoteAddress) -> {
+                    BedrockPong pong = GeyserImpl.getInstance().getGeyserServer().onQuery(PING_CHANNEL, remoteAddress);
 
-            this.bossGroup = new NioEventLoopGroup(1);
-            this.workerGroup = new NioEventLoopGroup();
+                    return new NetherNetServerSignaling.PongData.Builder()
+                        .setServerName(pong.motd())
+                        .setProtocol(pong.protocolVersion())
+                        .setVersion(pong.version())
+                        .setPlayerCount(pong.playerCount())
+                        .setMaxPlayerCount(pong.maximumPlayerCount())
+                        .build();
+                });
+
+            // Enable https if configured to do so
+            if (config.https().enabled()) {
+                signallingBuilder.setHttpsKeystore(this.dataFolder().resolve(config.https().keystore()).toFile(), config.https().password());
+            }
+
+            this.signaling = signallingBuilder.build();
+
+            this.eventLoopGroup = new MultiThreadIoEventLoopGroup(NioIoHandler.newFactory());
 
             ServerBootstrap b = new ServerBootstrap();
-            b.group(bossGroup, workerGroup)
+            b.group(eventLoopGroup)
                 .channelFactory(NetherNetChannelFactory.server(new PeerConnectionFactory(), signaling))
                 .childHandler(new NetherNetChannelInitialiser(GeyserImpl.getInstance()));
 
@@ -89,11 +113,8 @@ public class NetherNetExtension implements Extension {
         if (this.netherNetChannel != null) {
             this.netherNetChannel.close();
         }
-        if (this.bossGroup != null) {
-            this.bossGroup.shutdownGracefully();
-        }
-        if (this.workerGroup != null) {
-            this.workerGroup.shutdownGracefully();
+        if (this.eventLoopGroup != null) {
+            this.eventLoopGroup.shutdownGracefully();
         }
     }
 }
