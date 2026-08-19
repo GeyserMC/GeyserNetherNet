@@ -12,11 +12,10 @@ relocate("com.google.gson")
 
 val nativePlatforms = listOf(
     "windows-x86_64",
-    "windows-aarch64",
-    "linux-x86_64",
-    "linux-aarch64",
+    "x86_64",
+    "aarch64",
     "macos-x86_64",
-    "macos-aarch64"
+    "macos-arm64"
 )
 
 val id = project.property("id") as String
@@ -26,7 +25,7 @@ val version = project.version as String
 
 val geyserVersion = "2.11.0"
 val netherNetVersion = "1.8.0"
-val webrtcVersion = "1.0.4"
+val libdatachannelVersion = "0.24.1.1"
 
 val configurateVersion = "4.2.0-GeyserMC-20251111.004649-11"
 
@@ -49,9 +48,9 @@ dependencies {
     implementation("dev.kastle.netty:netty-transport-nethernet:$netherNetVersion")
 
     // The WebRTC library and its natives
-    implementation("dev.kastle.webrtc:webrtc-java:$webrtcVersion")
+    implementation("tel.schich:libdatachannel-java:$libdatachannelVersion")
     nativePlatforms.forEach { platform ->
-        runtimeOnly("dev.kastle.webrtc:webrtc-java:$webrtcVersion:$platform")
+        runtimeOnly("tel.schich:libdatachannel-java:$libdatachannelVersion:$platform")
     }
 
     // Configurate
@@ -102,6 +101,10 @@ tasks {
             // Exclude netty apart from the http codec
             exclude {
                 it.moduleGroup == "io.netty" && (it.moduleName != "netty-codec-http" && it.moduleName != "netty-handler")
+            }
+
+            exclude {
+                it.moduleGroup == "org.slf4j"
             }
         }
 

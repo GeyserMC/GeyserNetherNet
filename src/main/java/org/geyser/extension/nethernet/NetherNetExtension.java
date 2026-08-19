@@ -3,7 +3,7 @@ package org.geyser.extension.nethernet;
 import dev.kastle.netty.channel.nethernet.NetherNetChannelFactory;
 import dev.kastle.netty.channel.nethernet.signaling.NetherNetHTTPSignaling;
 import dev.kastle.netty.channel.nethernet.signaling.NetherNetServerSignaling;
-import dev.kastle.webrtc.PeerConnectionFactory;
+import dev.kastle.netty.util.nethernet.NetherNetLogging;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.EventLoopGroup;
@@ -57,6 +57,9 @@ public class NetherNetExtension implements Extension {
             return;
         }
 
+        // Keep libdatachannel's own logging out of the way
+        NetherNetLogging.setNativeLogLevel("WARN");
+
         // Start up NetherNet
         try {
             // Build the base signaling instance
@@ -85,7 +88,7 @@ public class NetherNetExtension implements Extension {
 
             ServerBootstrap b = new ServerBootstrap();
             b.group(eventLoopGroup)
-                .channelFactory(NetherNetChannelFactory.server(new PeerConnectionFactory(), signaling))
+                .channelFactory(NetherNetChannelFactory.server(signaling))
                 .childHandler(new NetherNetChannelInitialiser(GeyserImpl.getInstance()));
 
             BedrockListener listener = this.geyserApi().bedrockListener();
