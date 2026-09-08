@@ -16,6 +16,18 @@ class ProviderConfigurationTest {
         Files.writeString(dir.resolve("config.yml"), yaml);
         return ProviderRuntimeConfiguration.resolve(ConfigLoader.loadConfig(dir.resolve("config.yml").toFile(), env), dir, "::", 20000, 40);
     }
+    @Test void loadsTheOperatorConsoleConfigurationWithSeparatePersistentIdentityAndToken(@TempDir Path dir) throws Exception {
+        Files.writeString(dir.resolve("warden-enrolment.token"), "console-test-token\n");
+        var config = runtime(dir, Files.readString(Path.of("examples/provider-console.yml")), Map.of());
+        assertEquals("automatic", config.clientConfiguration().registrationMode());
+        assertEquals("bearer-token", config.clientConfiguration().authorizationScheme());
+        assertEquals("console-test-token", config.authorizationToken());
+        assertEquals("EU", config.region()); assertEquals("lobby", config.pool());
+        assertEquals(Map.of(), config.tags());
+        assertEquals(dir.resolve("provider-state"), config.stateDirectory());
+        assertEquals(20001, config.udpPort()); assertEquals(40, config.capacity());
+    }
+
     @Test void freshConfigHasOnlyTheFiveOptionsAndInheritsGeyser(@TempDir Path dir) throws Exception {
         var config = ConfigLoader.loadConfig(dir.resolve("config.yml").toFile(), Map.of());
         assertEquals("hybrid", config.signalling());
