@@ -16,6 +16,8 @@ import org.geyser.extension.nethernet.nethernet.codec.NetherNetPacketDecoder;
 import org.geyser.extension.nethernet.nethernet.codec.NetherNetPacketEncoder;
 import org.geysermc.geyser.GeyserImpl;
 import org.geysermc.geyser.network.InvalidPacketHandler;
+import org.geysermc.geyser.network.GameProtocol;
+import org.geyser.extension.nethernet.provider.GameOutcomeReporter;
 import org.geysermc.geyser.network.UpstreamPacketHandler;
 import org.geysermc.geyser.session.GeyserSession;
 
@@ -26,11 +28,17 @@ public class NetherNetChannelInitialiser extends ChannelInitializer<Channel> {
     private static final CompressionStrategy ZLIB_RAW_STRATEGY = new SimpleCompressionStrategy(new ZlibCompression(Zlib.RAW));
 
     private final GeyserImpl geyser;
+    private final GameOutcomeReporter outcomes;
 
     private final DefaultEventLoopGroup eventLoopGroup;
 
     public NetherNetChannelInitialiser(GeyserImpl geyser) {
+        this(geyser, new GameOutcomeReporter());
+    }
+
+    public NetherNetChannelInitialiser(GeyserImpl geyser, GameOutcomeReporter outcomes) {
         this.geyser = geyser;
+        this.outcomes = outcomes;
         this.eventLoopGroup = new DefaultEventLoopGroup(0, new DefaultThreadFactory("Geyser NetherNet player thread"));
     }
 
@@ -40,6 +48,7 @@ public class NetherNetChannelInitialiser extends ChannelInitializer<Channel> {
             .addLast(NetherNetPacketDecoder.NAME, new NetherNetPacketDecoder())
             .addLast(NetherNetPacketEncoder.NAME, new NetherNetPacketEncoder())
             .addLast(BedrockPacketCodec.NAME, new BedrockPacketCodec_v3())
+            .addLast(GameOutcomeReporter.HANDLER_NAME, outcomes.observer(protocol -> GameProtocol.getBedrockCodec(protocol) != null))
             .addLast(BedrockPeer.NAME, new NetherNetPeer(channel, this::createSession));
     }
 

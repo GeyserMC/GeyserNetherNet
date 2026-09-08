@@ -1,0 +1,10 @@
+signalling: hybrid
+nxs:
+  advertise-addresses: []
+  token: file:/run/secrets/nxs-token
+  endpoint: https://signal.host.example
+  data:
+    region: EU
+    pool: customers
+    product: minecraft
+    plan: standard

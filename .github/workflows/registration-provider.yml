@@ -1,0 +1,37 @@
+name: Native provider extension
+on:
+  push:
+    branches: [nxs-dev]
+  pull_request:
+permissions:
+  contents: read
+concurrency:
+  group: native-extension-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+jobs:
+  extension:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871
+        with:
+          path: GeyserNetherNet
+      - uses: actions/setup-java@b36c23c0d998641eff861008f374ee103c25ac73
+        with:
+          distribution: temurin
+          java-version: |
+            8
+            17
+            21
+      - uses: gradle/actions/setup-gradle@d156388eb19639ec20ade50009f3d199ce1e2808
+      - run: sudo apt-get update && sudo apt-get install -y cmake ninja-build g++ libssl-dev pkg-config
+      - run: bash scripts/build-native-development.sh
+        working-directory: GeyserNetherNet
+      - uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882
+        with:
+          name: GeyserNetherNet-native-${{ github.sha }}
+          path: |
+            GeyserNetherNet/build/libs/*.jar
+            GeyserNetherNet/build/provenance.json
+            GeyserNetherNet/build/test-results/test/*.xml
+          if-no-files-found: error

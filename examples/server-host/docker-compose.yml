@@ -1,0 +1,23 @@
+services:
+  geyser:
+    image: ${GEYSER_IMAGE:?set GEYSER_IMAGE to a Geyser image containing this extension}
+    restart: unless-stopped
+    environment:
+      NETHERNET_SIGNALLING: hybrid
+      NETHERNET_NXS_ENDPOINT: https://signal.host.example
+      NETHERNET_NXS_TOKEN: file:/run/secrets/provider-token
+      NETHERNET_NXS_DATA: '{"region":"EU","pool":"customers","product":"minecraft","plan":"standard"}'
+      NETHERNET_NXS_ADVERTISE_ADDRESSES: ${NETHERNET_NXS_ADVERTISE_ADDRESSES:?set a JSON list of reachable IP:port endpoints}
+    secrets:
+      - provider-token
+    volumes:
+      - provider-state:/opt/geyser/extensions/nethernet
+    ports:
+      - 19132:19132/udp
+      - 19132:19132/tcp
+      - 19133:19133/udp
+secrets:
+  provider-token:
+    file: ./customer-provider-token
+volumes:
+  provider-state:

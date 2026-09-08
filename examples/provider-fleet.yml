@@ -1,0 +1,10 @@
+signalling: nxs
+nxs:
+  advertise-addresses: []
+  token: file:/run/secrets/nxs-token
+  endpoint: https://agent.warden.cloud
+  data:
+    region: EU
+    pool: proxy
+    location: london
+    role: game-proxy

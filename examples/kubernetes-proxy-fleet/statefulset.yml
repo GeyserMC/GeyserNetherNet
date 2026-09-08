@@ -1,0 +1,66 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: nethernet-proxy
+spec:
+  clusterIP: None
+  selector:
+    app: nethernet-proxy
+  ports:
+    - name: bedrock
+      port: 19132
+      protocol: UDP
+    - name: nethernet
+      port: 19133
+      protocol: UDP
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: nethernet-proxy
+spec:
+  serviceName: nethernet-proxy
+  replicas: 3
+  podManagementPolicy: Parallel
+  selector:
+    matchLabels:
+      app: nethernet-proxy
+  template:
+    metadata:
+      labels:
+        app: nethernet-proxy
+    spec:
+      terminationGracePeriodSeconds: 30
+      containers:
+        - name: geyser
+          image: your-registry.example/geyser-nethernet:VERSION
+          ports:
+            - name: bedrock
+              containerPort: 19132
+              protocol: UDP
+            - name: nethernet
+              containerPort: 19133
+              protocol: UDP
+          env:
+            - name: NETHERNET_SIGNALLING
+              value: nxs
+            - name: NETHERNET_NXS_ENDPOINT
+              value: https://agent.warden.cloud
+            - name: NETHERNET_NXS_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: nethernet-proxy-provider
+                  key: token
+            - name: NETHERNET_NXS_DATA
+              value: '{"region":"EU","pool":"proxy","location":"london","role":"game-proxy"}'
+          volumeMounts:
+            - name: provider-state
+              mountPath: /opt/geyser/extensions/nethernet
+  volumeClaimTemplates:
+    - metadata:
+        name: provider-state
+      spec:
+        accessModes: [ReadWriteOnce]
+        resources:
+          requests:
+            storage: 128Mi

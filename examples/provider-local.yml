@@ -1,0 +1,7 @@
+# Anonymous registration with Warden, plus inbuilt HTTP signalling.
+signalling: hybrid
+nxs:
+  advertise-addresses: []
+  token: ''
+  endpoint: https://agent.warden.cloud
+  data: {}
