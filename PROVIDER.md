@@ -126,3 +126,23 @@ Examples cover [anonymous NXS](examples/provider-local.yml),
 The [NXS contract](https://github.com/teamziax/NetworkCompatible/blob/nxs-dev/docs/external-signalling/README.md)
 and [native build instructions](docs/native-admission.md) describe the maintained
 source chain. Native/fixture readiness does not establish stock-client gameplay.
+
+## Warden shared fleet registration and runtime counts
+
+The Warden connection wizard can generate `examples/provider-console.yml` and a
+separate token file. Save the token in the extension data directory. Each live
+replica needs its own persistent directory; preserving `provider-state` across
+restarts preserves its runtime identity.
+
+Warden organisation API keys select initial Signal Servers through enrolment
+configuration. One Game Server can attach to several Signal Servers. The host's
+`region` and `pool` data fields select that configuration; a Pool is not a separate
+operator resource. Fleet completion can omit `publicAddress` and `serviceId`.
+The extension logs the runtime identity and directs operators to the attached
+Signal Servers for public addresses, without treating that response as a failure.
+
+Heartbeat player telemetry samples Geyser's actual session-manager count and
+sample time independently of server-list status. Counts can exceed a lowered
+admission capacity; only the legacy load fraction is bounded to one. Public
+status overrides never replace this actual-player sample. This consumer requires
+the exact NetworkCompatible revision in `registration-network.properties`.
