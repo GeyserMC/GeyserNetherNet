@@ -1,0 +1,8 @@
+signalling: nxs
+nxs:
+  advertise-addresses: []
+  token: "file:warden-enrolment.token"
+  endpoint: "https://agent.warden.cloud"
+  data:
+    region: "EU"
+    pool: "lobby"

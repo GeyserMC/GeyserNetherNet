@@ -156,7 +156,7 @@ public class NetherNetExtension implements Extension {
                 initializingTransport = transport;
                 transport = new GameOutcomeTransport(transport, gameOutcomes);
                 ProviderClient client = new ProviderClient(runtime.clientConfiguration(), store, transport,
-                    () -> providerStatusSupplier.get(), () -> new ProviderClient.Health(true, runtime.capacity(), Math.min(1, (double) GeyserImpl.getInstance().getSessionManager().size() / Math.max(1, runtime.capacity())), "nethernet", description().version()), message -> logger().warning(message));
+                    () -> providerStatusSupplier.get(), () -> ProviderRuntimeObservations.health(GeyserImpl.getInstance().getSessionManager().size(), runtime.capacity(), System.currentTimeMillis(), description().version()), message -> logger().warning(message));
                 store = null; // ProviderClient now owns its lifetime.
                 initializingTransport = null;
                 synchronized (providerLifecycle) {
@@ -168,7 +168,7 @@ public class NetherNetExtension implements Extension {
                 }
                 client.start().whenComplete((registration, failure) -> {
                     if (failure != null) { logger().error("Provider startup failed: " + providerFailure(failure)); stopProvider(); return; }
-                    logger().info("Provider address: " + registration.get("publicAddress").getAsString() + " (instance " + registration.get("instanceId").getAsString() + ")");
+                    logger().info(ProviderRuntimeObservations.registrationMessage(registration));
                     WardenClaimAdapter claim = wardenClaim;
                     if (claim != null) claim.current().thenAccept(action -> action.ifPresent(value -> logger().info(value.message())));
                 });
