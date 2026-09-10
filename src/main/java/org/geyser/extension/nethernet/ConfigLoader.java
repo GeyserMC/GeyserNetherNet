@@ -13,20 +13,28 @@ import java.io.IOException;
 import java.util.*;
 
 public final class ConfigLoader {
-    public static Config loadConfig(File file) throws IOException { return loadConfig(file, System.getenv()); }
+    public static Config loadConfig(File file) throws IOException {
+        return loadConfig(file, System.getenv());
+    }
 
     public static Config loadConfig(File file, Map<String, String> environment) throws IOException {
         var loader = createLoader(file);
         CommentedConfigurationNode node;
-        try { node = loader.load(); }
-        catch (ConfigurateException invalid) { throw new IOException("Invalid YAML in signalling configuration"); }
+        try {
+            node = loader.load();
+        } catch (ConfigurateException invalid) {
+            throw new IOException("Invalid YAML in signalling configuration");
+        }
         validateKeys(node, Set.of("signalling", "nxs"));
         validateKeys(node.node("nxs"), Set.of("advertise-addresses", "token", "endpoint", "data"));
         boolean save = !file.exists() || node.isNull();
         if (node.node("signalling").virtual()) node.node("signalling").set("hybrid");
         Config config;
-        try { config = node.get(Config.class); }
-        catch (ConfigurateException invalid) { throw new IOException("Invalid signalling configuration; check value types"); }
+        try {
+            config = node.get(Config.class);
+        } catch (ConfigurateException invalid) {
+            throw new IOException("Invalid signalling configuration; check value types");
+        }
         var defaults = CommentedConfigurationNode.root(loader.defaultOptions());
         defaults.set(config);
         node.mergeFrom(defaults);
@@ -42,7 +50,9 @@ public final class ConfigLoader {
                     var parsed = YamlConfigurationLoader.builder().source(() -> new BufferedReader(new StringReader(value))).build().load();
                     if (key.equals("nxs.data") ? !parsed.isMap() : !parsed.isList()) throw new IOException();
                     target.set(parsed);
-                } catch (Exception invalid) { throw new IOException(variable + " must contain a YAML/JSON " + (key.equals("nxs.data") ? "string map" : "list of IP:port strings")); }
+                } catch (Exception invalid) {
+                    throw new IOException(variable + " must contain a YAML/JSON " + (key.equals("nxs.data") ? "string map" : "list of IP:port strings"));
+                }
             } else target.set(value);
         }
         try {
@@ -53,16 +63,20 @@ public final class ConfigLoader {
             if (!Set.of("inbuilt", "nxs", "hybrid", "none").contains(config.signalling()))
                 throw new IOException("signalling must be inbuilt, nxs, hybrid, or none");
             return config;
-        } catch (ConfigurateException invalid) { throw new IOException("Invalid signalling configuration; check value types"); }
+        } catch (ConfigurateException invalid) {
+            throw new IOException("Invalid signalling configuration; check value types");
+        }
     }
 
     private static void validateKeys(CommentedConfigurationNode node, Set<String> keys) throws IOException {
-        if (!node.virtual() && !node.isNull() && !node.isMap()) throw new IOException("Signalling configuration sections must be maps");
-        if (!keys.containsAll(node.childrenMap().keySet())) throw new IOException("Unknown signalling setting; use signalling and nxs.advertise-addresses, token, endpoint, data");
+        if (!node.virtual() && !node.isNull() && !node.isMap())
+            throw new IOException("Signalling configuration sections must be maps");
+        if (!keys.containsAll(node.childrenMap().keySet()))
+            throw new IOException("Unknown signalling setting; use signalling and nxs.advertise-addresses, token, endpoint, data");
     }
 
     private static YamlConfigurationLoader createLoader(File file) {
         return YamlConfigurationLoader.builder().file(file).indent(2).nodeStyle(NodeStyle.BLOCK)
-            .defaultOptions(InterfaceDefaultOptions::addTo).build();
+                .defaultOptions(InterfaceDefaultOptions::addTo).build();
     }
 }

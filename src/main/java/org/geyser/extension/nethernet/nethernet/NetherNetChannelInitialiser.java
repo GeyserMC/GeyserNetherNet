@@ -45,11 +45,11 @@ public class NetherNetChannelInitialiser extends ChannelInitializer<Channel> {
     @Override
     protected void initChannel(Channel channel) throws Exception {
         channel.pipeline()
-            .addLast(NetherNetPacketDecoder.NAME, new NetherNetPacketDecoder())
-            .addLast(NetherNetPacketEncoder.NAME, new NetherNetPacketEncoder())
-            .addLast(BedrockPacketCodec.NAME, new BedrockPacketCodec_v3())
-            .addLast(GameOutcomeReporter.HANDLER_NAME, outcomes.observer(protocol -> GameProtocol.getBedrockCodec(protocol) != null))
-            .addLast(BedrockPeer.NAME, new NetherNetPeer(channel, this::createSession));
+                .addLast(NetherNetPacketDecoder.NAME, new NetherNetPacketDecoder())
+                .addLast(NetherNetPacketEncoder.NAME, new NetherNetPacketEncoder())
+                .addLast(BedrockPacketCodec.NAME, new BedrockPacketCodec_v3())
+                .addLast(GameOutcomeReporter.HANDLER_NAME, outcomes.observer(protocol -> GameProtocol.getBedrockCodec(protocol) != null))
+                .addLast(BedrockPeer.NAME, new NetherNetPeer(channel, this::createSession));
     }
 
     public static CompressionStrategy getCompression() {

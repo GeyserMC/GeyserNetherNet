@@ -29,7 +29,7 @@ public class NetherNetCompressionDecoder extends MessageToMessageDecoder<ByteBuf
         }
 
         int header = msg.readUnsignedByte();
-        
+
         BatchCompression compression = switch (header) {
             case 0x00 -> this.strategy.getCompression(PacketCompressionAlgorithm.ZLIB);
             case 0x01 -> this.strategy.getCompression(PacketCompressionAlgorithm.SNAPPY);
@@ -37,6 +37,6 @@ public class NetherNetCompressionDecoder extends MessageToMessageDecoder<ByteBuf
             default -> throw new IllegalStateException("Unknown compression algorithm header: " + header);
         };
 
-        out.add(compression.decode(ctx, msg)); 
+        out.add(compression.decode(ctx, msg));
     }
 }

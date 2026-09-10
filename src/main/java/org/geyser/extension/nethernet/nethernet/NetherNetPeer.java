@@ -40,11 +40,11 @@ public class NetherNetPeer extends GeyserBedrockPeer {
 
         if (pipeline.get(NetherNetCompressionDecoder.NAME) == null) {
             pipeline.addBefore(NetherNetPacketDecoder.NAME, NetherNetCompressionDecoder.NAME,
-                new NetherNetCompressionDecoder(strategy, prefixed));
+                    new NetherNetCompressionDecoder(strategy, prefixed));
         }
         if (pipeline.get(NetherNetCompressionEncoder.NAME) == null) {
             pipeline.addBefore(NetherNetPacketEncoder.NAME, NetherNetCompressionEncoder.NAME,
-                new NetherNetCompressionEncoder(strategy, prefixed, 1));
+                    new NetherNetCompressionEncoder(strategy, prefixed, 1));
         }
     }
 }

@@ -17,7 +17,9 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.IntPredicate;
 
-/** Game admission evidence, independent of native transport establishment and teardown. */
+/**
+ * Game admission evidence, independent of native transport establishment and teardown.
+ */
 public final class GameOutcomeReporter {
     public static final String HANDLER_NAME = "nethernet-game-outcome";
     private static final AttributeKey<State> STATE = AttributeKey.valueOf(GameOutcomeReporter.class, "state");
@@ -33,7 +35,8 @@ public final class GameOutcomeReporter {
 
     public ChannelDuplexHandler observer(IntPredicate supportedProtocol) {
         return new ChannelDuplexHandler() {
-            @Override public void channelRead(ChannelHandlerContext ctx, Object message) throws Exception {
+            @Override
+            public void channelRead(ChannelHandlerContext ctx, Object message) throws Exception {
                 if (message instanceof BedrockPacketWrapper wrapper && primary(wrapper)
                         && wrapper.getPacket() instanceof RequestNetworkSettingsPacket settings) {
                     State state = state(ctx.channel());
@@ -44,7 +47,8 @@ public final class GameOutcomeReporter {
                 ctx.fireChannelRead(message);
             }
 
-            @Override public void write(ChannelHandlerContext ctx, Object message, ChannelPromise promise) throws Exception {
+            @Override
+            public void write(ChannelHandlerContext ctx, Object message, ChannelPromise promise) throws Exception {
                 if (message instanceof BedrockPacketWrapper wrapper && primary(wrapper)
                         && wrapper.getPacket() instanceof DisconnectPacket) {
                     report(ctx.channel(), false);
@@ -68,8 +72,12 @@ public final class GameOutcomeReporter {
         return previous == null ? created : previous;
     }
 
-    /** Called only by Geyser's play-ready SessionJoinEvent, never by channel-open. */
-    public void joined(Channel channel) { report(channel, true); }
+    /**
+     * Called only by Geyser's play-ready SessionJoinEvent, never by channel-open.
+     */
+    public void joined(Channel channel) {
+        report(channel, true);
+    }
 
     private void report(Channel channel, boolean joined) {
         if (closed) return;
@@ -88,7 +96,16 @@ public final class GameOutcomeReporter {
         }
     }
 
-    public void drainTo(List<JsonObject> batch, int maximum) { events.drainTo(batch, maximum); }
-    public long droppedEvents() { return dropped.get(); }
-    public void close() { closed = true; events.clear(); }
+    public void drainTo(List<JsonObject> batch, int maximum) {
+        events.drainTo(batch, maximum);
+    }
+
+    public long droppedEvents() {
+        return dropped.get();
+    }
+
+    public void close() {
+        closed = true;
+        events.clear();
+    }
 }

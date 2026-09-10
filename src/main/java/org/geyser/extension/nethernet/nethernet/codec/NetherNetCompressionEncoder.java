@@ -34,11 +34,11 @@ public class NetherNetCompressionEncoder extends MessageToByteEncoder<ByteBuf> {
         try {
             if (this.prefixed) {
                 out.writeByte(
-                switch ((PacketCompressionAlgorithm) compression.getAlgorithm()) {
-                    case ZLIB -> 0x00;
-                    case SNAPPY -> 0x01;
-                    default -> (byte) 0xff;
-                });
+                        switch ((PacketCompressionAlgorithm) compression.getAlgorithm()) {
+                            case ZLIB -> 0x00;
+                            case SNAPPY -> 0x01;
+                            default -> (byte) 0xff;
+                        });
             }
             out.writeBytes(compressed);
         } catch (Exception e) {
